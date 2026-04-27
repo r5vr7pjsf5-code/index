@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FITFORM — Программы Тренировок</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,800;0,900;1,300&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --card: #161616;
+      --border: #222222;
+      --accent: #C8F400;
+      --accent2: #FF4B4B;
+      --accent3: #00C9FF;
+      --text: #EDEDED;
+      --muted: #666666;
+      --white: #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,8,8,.92);
+      backdrop-filter: blur(20px);
+    }
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: .12em;
+      color: var(--accent);
+    }
+    .logo span { color: var(--white); }
+
+    /* Hamburger menu */
+    .burger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .burger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--muted);
+      transition: background .2s;
+    }
+    .burger:hover span { background: var(--accent); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 53px; left: 0; right: 0;
+      background: rgba(8,8,8,.97);
+      border-bottom: 1px solid var(--border);
+      z-index: 99;
+      padding: 1.5rem 1.5rem;
+      flex-direction: column;
+      gap: 0;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      text-decoration: none;
+      color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .9rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-top: 53px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left {
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 2.5rem 1.5rem 3rem;
+      position: relative; z-index: 2;
+    }
+    .hero-tag {
+      font-size: .7rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(3.8rem, 18vw, 7rem);
+      line-height: .92;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.65;
+      margin-bottom: 2rem;
+    }
+
+    /* Hero stats row */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+    }
+    .hero-stat {
+      padding: 1.2rem 1rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-stat-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 2.4rem;
+      color: var(--white);
+      line-height: 1;
+    }
+    .hero-stat-num span { color: var(--accent); }
+    .hero-stat-label {
+      font-size: .68rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-top: .25rem;
+    }
+
+    /* SECTION COMMON */
+    section { position: relative; z-index: 1; }
+    .section-header {
+      padding: 3rem 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-label {
+      font-size: .65rem;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .6rem;
+    }
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.2rem, 10vw, 4rem);
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: .95;
+      margin-bottom: .5rem;
+    }
+    .section-title em { font-style: italic; color: var(--muted); }
+    .section-count {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 300;
+      font-size: .9rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      margin-top: .5rem;
+    }
+
+    /* PROFILES TABS */
+    .profiles-tabs {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    .profiles-tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0;
+      padding: 1rem 1.4rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      transition: color .2s, background .2s;
+      position: relative;
+    }
+    .tab.active, .tab:hover { color: var(--white); background: var(--surface); }
+    .tab.active::after {
+      content: '';
+      position: absolute; bottom: -1px; left: 0; right: 0;
+      height: 2px; background: var(--accent);
+    }
+
+    /* PROGRAM CARDS */
+    .programs-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+    .program-card {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .program-card::before {
+      content: attr(data-num);
+      position: absolute; top: -1rem; right: 1rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 6rem;
+      color: rgba(255,255,255,.03);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .card-badge {
+      display: inline-block;
+      font-size: .6rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      padding: .28rem .7rem;
+      border: 1px solid;
+      margin-bottom: 1.2rem;
+    }
+    .badge-beginner { color: var(--accent); border-color: var(--accent); }
+    .badge-inter    { color: var(--accent3); border-color: var(--accent3); }
+    .badge-advanced { color: var(--accent2); border-color: var(--accent2); }
+    .badge-women    { color: #FF9BE8; border-color: #FF9BE8; }
+    .badge-senior   { color: #FFD166; border-color: #FFD166; }
+
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.7rem;
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: .7rem;
+    }
+    .card-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .card-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+    .meta-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--white);
+    }
+    .meta-key {
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* WEEKLY SCHEDULE */
+    .schedule-section { background: var(--surface); }
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    .day-col {
+      background: var(--card);
+      padding: 1.5rem 1.2rem;
+      min-height: 180px;
+      position: relative;
+    }
+    .day-col.rest { background: #0e0e0e; }
+    .day-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--white);
+      margin-bottom: .2rem;
+    }
+    .day-type {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 1rem;
+    }
+    .workout-pill {
+      background: rgba(200,244,0,.08);
+      border-left: 2px solid var(--accent);
+      padding: .4rem .65rem;
+      margin-bottom: .45rem;
+      font-size: .72rem;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .workout-pill.blue { background: rgba(0,201,255,.08); border-color: var(--accent3); }
+    .workout-pill.red  { background: rgba(255,75,75,.08); border-color: var(--accent2); }
+    .rest-label {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--border);
+    }
+
+    /* EXERCISE TABLE — card layout on mobile */
+    .exercises-section { }
+    .ex-table-wrap { padding: 1.5rem; }
+
+    /* Hide desktop table, show cards */
+    table { display: none; }
+
+    .ex-cards { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
+    .ex-card {
+      background: var(--card);
+      padding: 1.2rem 1.4rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: .5rem 1rem;
+      align-items: start;
+    }
+    .ex-card:active { background: var(--surface); }
+    .ex-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--muted);
+      padding-top: .1rem;
+    }
+    .ex-info { }
+    .ex-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--white);
+      line-height: 1.15;
+    }
+    .ex-muscle {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .2rem;
+    }
+    .ex-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: .4rem;
+    }
+    .ex-sets {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--accent);
+    }
+    .ex-rest {
+      font-size: .68rem;
+      color: var(--muted);
+    }
+    .difficulty-bar {
+      display: flex; gap: 3px; align-items: center;
+    }
+    .diff-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .diff-dot.on { background: var(--accent2); }
+
+    /* PROFILES */
+    .profiles-deep {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+    .profile-card {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .profile-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+    }
+    .profile-card.p1::after { background: var(--accent); }
+    .profile-card.p2::after { background: var(--accent3); }
+    .profile-card.p3::after { background: var(--accent2); }
+    .profile-card.p4::after { background: #FF9BE8; }
+    .profile-card.p5::after { background: #FFD166; }
+
+    .profile-emoji { font-size: 2.5rem; margin-bottom: 1.2rem; }
+    .profile-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: .25rem;
+    }
+    .profile-sub {
+      font-size: .75rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .profile-desc {
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .ptag {
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .3rem .7rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* MARQUEE */
+    .marquee-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      padding: .85rem 0;
+      background: var(--surface);
+    }
+    .marquee-track {
+      display: flex; gap: 3rem;
+      animation: marquee 22s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-track span {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--muted);
+    }
+    .marquee-track span.accent { color: var(--accent); }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* TIPS STRIP */
+    .tips-strip {
+      background: var(--accent);
+      padding: 2.5rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem 1.5rem;
+    }
+    .tip-item { }
+    .tip-icon { font-size: 1.8rem; margin-bottom: .8rem; }
+    .tip-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      color: var(--bg);
+      margin-bottom: .4rem;
+    }
+    .tip-text {
+      font-size: .78rem;
+      color: rgba(8,8,8,.7);
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .8rem;
+      text-align: center;
+    }
+    .foot-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: .12em;
+      color: var(--accent);
+    }
+    .foot-logo span { color: var(--muted); }
+    .foot-copy {
+      font-size: .75rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+    }
+
+    /* ANIMATIONS */
+    .hero-title { animation: fadeUp .9s .1s both; }
+    .hero-sub   { animation: fadeUp .9s .25s both; }
+    .hero-stats { animation: fadeUp .9s .4s both; }
+    .hero-tag   { animation: fadeUp .9s 0s both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">FIT<span>FORM</span></div>
+  <div class="burger" onclick="toggleMenu()" id="burger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#profiles" onclick="closeMenu()">Профили</a>
+  <a href="#programs" onclick="closeMenu()">Программы</a>
+  <a href="#schedule" onclick="closeMenu()">Расписание</a>
+  <a href="#exercises" onclick="closeMenu()">Упражнения</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-tag">— Персональный фитнес-план</p>
+    <h1 class="hero-title">ТВОЁ<br/><em>ТЕЛО.</em><br/>ТВОИ<br/>ПРАВИЛА.</h1>
+    <p class="hero-sub">Программы тренировок, разработанные специально под каждый тип человека — новичок, спортсмен, женщина или зрелый возраст. Никаких шаблонов.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">5<span>+</span></div>
+        <div class="hero-stat-label">Типов людей</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">40<span>+</span></div>
+        <div class="hero-stat-label">Упражнений</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">12<span>нед</span></div>
+        <div class="hero-stat-label">Средний курс</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-track">
+    <span>Сила</span><span class="accent">·</span>
+    <span>Выносливость</span><span class="accent">·</span>
+    <span>Гибкость</span><span class="accent">·</span>
+    <span>Баланс</span><span class="accent">·</span>
+    <span>Рост</span><span class="accent">·</span>
+    <span>Восстановление</span><span class="accent">·</span>
+    <span>Питание</span><span class="accent">·</span>
+    <span>Кардио</span><span class="accent">·</span>
+    <span>Сила</span><span class="accent">·</span>
+    <span>Выносливость</span><span class="accent">·</span>
+    <span>Гибкость</span><span class="accent">·</span>
+    <span>Баланс</span><span class="accent">·</span>
+    <span>Рост</span><span class="accent">·</span>
+    <span>Восстановление</span><span class="accent">·</span>
+    <span>Питание</span><span class="accent">·</span>
+    <span>Кардио</span><span class="accent">·</span>
+  </div>
+</div>
+
+<!-- PROFILES -->
+<section id="profiles">
+  <div class="section-header">
+    <div class="section-label">Для кого</div>
+    <h2 class="section-title">ВЫБЕРИ<br/><em>СВОЙ ПРОФИЛЬ</em></h2>
+    <div class="section-count">05 профилей</div>
+  </div>
+  <div class="profiles-deep">
+    <div class="profile-card p1">
+      <div class="profile-emoji">🌱</div>
+      <div class="profile-name">Новичок</div>
+      <div class="profile-sub">0 – 6 месяцев опыта</div>
+      <p class="profile-desc">Только начинаешь путь? Идеально. Программа строится на базовых движениях, учит технике и формирует привычку тренироваться регулярно без перегрузок.</p>
+      <div class="profile-tags">
+        <span class="ptag">Техника</span>
+        <span class="ptag">3 дня / нед</span>
+        <span class="ptag">Без железа</span>
+        <span class="ptag">8 недель</span>
+      </div>
+    </div>
+    <div class="profile-card p2">
+      <div class="profile-emoji">⚡</div>
+      <div class="profile-name">Средний</div>
+      <div class="profile-sub">6 мес – 2 года опыта</div>
+      <p class="profile-desc">Базу знаешь, тело адаптировалось. Пора добавить объём, прогрессивную перегрузку и специализацию. Программа делает из любителя атлета.</p>
+      <div class="profile-tags">
+        <span class="ptag">Прогрессия</span>
+        <span class="ptag">4 дня / нед</span>
+        <span class="ptag">Гантели + гриф</span>
+        <span class="ptag">10 недель</span>
+      </div>
+    </div>
+    <div class="profile-card p3">
+      <div class="profile-emoji">🔥</div>
+      <div class="profile-name">Продвинутый</div>
+      <div class="profile-sub">2+ года опыта</div>
+      <p class="profile-desc">Ты хочешь максимум. Интенсивный сплит с тяжёлыми многосуставными движениями, акцентом на слабые места и периодизацией нагрузки.</p>
+      <div class="profile-tags">
+        <span class="ptag">Сплит</span>
+        <span class="ptag">5 дней / нед</span>
+        <span class="ptag">Тяжёлые веса</span>
+        <span class="ptag">12 недель</span>
+      </div>
+    </div>
+    <div class="profile-card p4">
+      <div class="profile-emoji">🌸</div>
+      <div class="profile-name">Для женщин</div>
+      <div class="profile-sub">Любой уровень</div>
+      <p class="profile-desc">Акцент на формировании фигуры: ягодицы, ноги, корпус. Работа с женской физиологией, цикличность нагрузки и mindful-восстановление.</p>
+      <div class="profile-tags">
+        <span class="ptag">Ягодицы</span>
+        <span class="ptag">3–4 дня / нед</span>
+        <span class="ptag">Кардио + сила</span>
+        <span class="ptag">10 недель</span>
+      </div>
+    </div>
+    <div class="profile-card p5">
+      <div class="profile-emoji">🧘</div>
+      <div class="profile-name">Зрелый возраст</div>
+      <div class="profile-sub">45+ лет</div>
+      <p class="profile-desc">Долголетие и качество движений — главный приоритет. Укрепление суставов, мобильность, лёгкое кардио и силовые с правильным восстановлением.</p>
+      <div class="profile-tags">
+        <span class="ptag">Суставы</span>
+        <span class="ptag">3 дня / нед</span>
+        <span class="ptag">Малый вес</span>
+        <span class="ptag">Без сроков</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section id="programs">
+  <div class="section-header">
+    <div class="section-label">Что тренируем</div>
+    <h2 class="section-title">ПРОГРАММЫ<br/><em>ТРЕНИРОВОК</em></h2>
+    <div class="section-count">06 программ</div>
+  </div>
+
+  <div class="profiles-tabs">
+    <div class="tab active">Все</div>
+    <div class="tab">Новичок</div>
+    <div class="tab">Средний</div>
+    <div class="tab">Продвинутый</div>
+    <div class="tab">Для женщин</div>
+    <div class="tab">45+</div>
+  </div>
+
+  <div class="programs-grid">
+    <div class="program-card" data-num="01">
+      <span class="card-badge badge-beginner">Новичок</span>
+      <h3 class="card-title">Full Body<br/>Старт</h3>
+      <p class="card-desc">Трёхдневная программа на всё тело. Базовые упражнения с собственным весом и лёгкими гантелями. Идеально для формирования движений и первых результатов.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">3</div><div class="meta-key">Дня/нед</div></div>
+        <div class="meta-item"><div class="meta-val">45м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">8</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+    <div class="program-card" data-num="02">
+      <span class="card-badge badge-inter">Средний</span>
+      <h3 class="card-title">Push / Pull /<br/>Legs</h3>
+      <p class="card-desc">Классический сплит PPL для набора мышечной массы. Каждая группа мышц получает достаточный объём и время для восстановления.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">6</div><div class="meta-key">Дней/нед</div></div>
+        <div class="meta-item"><div class="meta-val">60м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">10</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+    <div class="program-card" data-num="03">
+      <span class="card-badge badge-advanced">Продвинутый</span>
+      <h3 class="card-title">Hypertrophy<br/>Max</h3>
+      <p class="card-desc">Продвинутая программа на максимальную гипертрофию. Высокий объём, дроп-сеты, суперсеты и периодизация для опытных атлетов.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">5</div><div class="meta-key">Дней/нед</div></div>
+        <div class="meta-item"><div class="meta-val">75м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">12</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+    <div class="program-card" data-num="04">
+      <span class="card-badge badge-women">Для женщин</span>
+      <h3 class="card-title">Glute &amp;<br/>Core Focus</h3>
+      <p class="card-desc">Программа для придания формы нижней части тела и укрепления кора. Ягодичные мостики, приседания и планки — в умном сочетании с кардио.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">4</div><div class="meta-key">Дня/нед</div></div>
+        <div class="meta-item"><div class="meta-val">50м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">10</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+    <div class="program-card" data-num="05">
+      <span class="card-badge badge-senior">45+</span>
+      <h3 class="card-title">Мобильность<br/>и Сила</h3>
+      <p class="card-desc">Фокус на подвижности суставов, баланс и лёгкая силовая работа. Программа поддерживает здоровье тела и энергию без избыточной нагрузки.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">3</div><div class="meta-key">Дня/нед</div></div>
+        <div class="meta-item"><div class="meta-val">40м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">∞</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+    <div class="program-card" data-num="06">
+      <span class="card-badge badge-inter">Средний</span>
+      <h3 class="card-title">HIIT<br/>Кардио Жир</h3>
+      <p class="card-desc">Интервальные тренировки высокой интенсивности для сжигания жира при сохранении мышц. Короткие, мощные, эффективные сессии.</p>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-val">4</div><div class="meta-key">Дня/нед</div></div>
+        <div class="meta-item"><div class="meta-val">30м</div><div class="meta-key">Длит.</div></div>
+        <div class="meta-item"><div class="meta-val">8</div><div class="meta-key">Недель</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEKLY SCHEDULE -->
+<section id="schedule" class="schedule-section">
+  <div class="section-header">
+    <div class="section-label">Пример</div>
+    <h2 class="section-title">НЕДЕЛЬНОЕ<br/><em>РАСПИСАНИЕ</em></h2>
+    <div class="section-count">Push / Pull / Legs</div>
+  </div>
+  <div class="schedule-grid">
+    <div class="day-col">
+      <div class="day-name">Пн</div>
+      <div class="day-type" style="color:var(--accent)">Push — Грудь</div>
+      <div class="workout-pill">Жим лёжа · 4×8</div>
+      <div class="workout-pill">Жим гантелей · 3×10</div>
+      <div class="workout-pill">Трицепс блок · 3×12</div>
+      <div class="workout-pill">Отжимания · 2×max</div>
+    </div>
+    <div class="day-col">
+      <div class="day-name">Вт</div>
+      <div class="day-type" style="color:var(--accent3)">Pull — Спина</div>
+      <div class="workout-pill blue">Подтягивания · 4×8</div>
+      <div class="workout-pill blue">Тяга штанги · 3×8</div>
+      <div class="workout-pill blue">Горизонт. тяга · 3×12</div>
+      <div class="workout-pill blue">Бицепс EZ · 3×10</div>
+    </div>
+    <div class="day-col">
+      <div class="day-name">Ср</div>
+      <div class="day-type" style="color:var(--accent2)">Legs — Ноги</div>
+      <div class="workout-pill red">Присед · 4×8</div>
+      <div class="workout-pill red">Жим ногами · 3×10</div>
+      <div class="workout-pill red">Румынская тяга · 3×10</div>
+      <div class="workout-pill red">Икры · 4×15</div>
+    </div>
+    <div class="day-col rest">
+      <div class="day-name">Чт</div>
+      <div class="rest-label">Отдых</div>
+    </div>
+    <div class="day-col">
+      <div class="day-name">Пт</div>
+      <div class="day-type" style="color:var(--accent)">Push — Плечи</div>
+      <div class="workout-pill">Жим над головой · 4×8</div>
+      <div class="workout-pill">Разводка · 3×12</div>
+      <div class="workout-pill">Тяга к подбор. · 3×10</div>
+      <div class="workout-pill">Жим Арнольда · 3×12</div>
+    </div>
+    <div class="day-col">
+      <div class="day-name">Сб</div>
+      <div class="day-type" style="color:var(--accent3)">Pull — Спина+</div>
+      <div class="workout-pill blue">Становая тяга · 4×5</div>
+      <div class="workout-pill blue">Пул-овер · 3×12</div>
+      <div class="workout-pill blue">Лицевая тяга · 3×15</div>
+      <div class="workout-pill blue">Молот. бицепс · 3×12</div>
+    </div>
+    <div class="day-col rest" style="grid-column: span 2;">
+      <div class="day-name">Вс</div>
+      <div class="rest-label">Отдых</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXERCISES -->
+<section id="exercises" class="exercises-section">
+  <div class="section-header">
+    <div class="section-label">База</div>
+    <h2 class="section-title">КЛЮЧЕВЫЕ<br/><em>УПРАЖНЕНИЯ</em></h2>
+    <div class="section-count">15 упражнений</div>
+  </div>
+  <div class="ex-table-wrap">
+    <div class="ex-cards">
+      <div class="ex-card">
+        <span class="ex-num">01</span>
+        <div class="ex-info"><div class="ex-name">Приседания со штангой</div><div class="ex-muscle">Квадрицепсы, ягодицы, кор</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 8</span><span class="ex-rest">2–3 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">02</span>
+        <div class="ex-info"><div class="ex-name">Становая тяга</div><div class="ex-muscle">Спина, ягодицы, хамстринг</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 5</span><span class="ex-rest">3 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">03</span>
+        <div class="ex-info"><div class="ex-name">Жим штанги лёжа</div><div class="ex-muscle">Грудь, трицепс, передние дельты</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 8</span><span class="ex-rest">2 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">04</span>
+        <div class="ex-info"><div class="ex-name">Подтягивания широким хватом</div><div class="ex-muscle">Широчайшие, бицепс</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × max</span><span class="ex-rest">2 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">05</span>
+        <div class="ex-info"><div class="ex-name">Военный жим</div><div class="ex-muscle">Дельты, трицепс, кор</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 10</span><span class="ex-rest">2 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">06</span>
+        <div class="ex-info"><div class="ex-name">Ягодичный мостик</div><div class="ex-muscle">Ягодицы, хамстринг, кор</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 15</span><span class="ex-rest">90 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">07</span>
+        <div class="ex-info"><div class="ex-name">Планка</div><div class="ex-muscle">Кор, стабилизаторы</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 60с</span><span class="ex-rest">60 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">08</span>
+        <div class="ex-info"><div class="ex-name">Тяга гантели одной рукой</div><div class="ex-muscle">Широчайшие, ромбовидные</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 12</span><span class="ex-rest">90 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">09</span>
+        <div class="ex-info"><div class="ex-name">Болгарские выпады</div><div class="ex-muscle">Квадрицепсы, ягодицы, баланс</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 10</span><span class="ex-rest">2 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">10</span>
+        <div class="ex-info"><div class="ex-name">Разводка гантелей лёжа</div><div class="ex-muscle">Грудь, передние дельты</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 12</span><span class="ex-rest">90 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">11</span>
+        <div class="ex-info"><div class="ex-name">Подъём гантелей на бицепс</div><div class="ex-muscle">Бицепс, брахиалис</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 12</span><span class="ex-rest">60 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">12</span>
+        <div class="ex-info"><div class="ex-name">Разгибания на трицепс в блоке</div><div class="ex-muscle">Трицепс</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 15</span><span class="ex-rest">60 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">13</span>
+        <div class="ex-info"><div class="ex-name">Румынская тяга</div><div class="ex-muscle">Хамстринг, ягодицы, поясница</div></div>
+        <div class="ex-right"><span class="ex-sets">3 × 10</span><span class="ex-rest">2 мин</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">14</span>
+        <div class="ex-info"><div class="ex-name">Боковые подъёмы гантелей</div><div class="ex-muscle">Средние дельты</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 15</span><span class="ex-rest">60 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+      <div class="ex-card">
+        <span class="ex-num">15</span>
+        <div class="ex-info"><div class="ex-name">Подъём на носки стоя</div><div class="ex-muscle">Икроножные, камбаловидные</div></div>
+        <div class="ex-right"><span class="ex-sets">4 × 20</span><span class="ex-rest">60 сек</span><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<div class="tips-strip">
+  <div class="tip-item">
+    <div class="tip-icon">💧</div>
+    <div class="tip-title">Гидратация</div>
+    <p class="tip-text">Пей 30–40 мл воды на кг массы тела в день. Во время тренировки — по 200 мл каждые 20 минут.</p>
+  </div>
+  <div class="tip-item">
+    <div class="tip-icon">😴</div>
+    <div class="tip-title">Сон</div>
+    <p class="tip-text">Мышцы растут во время отдыха. 7–9 часов сна в сутки — обязательное условие любой программы.</p>
+  </div>
+  <div class="tip-item">
+    <div class="tip-icon">🥩</div>
+    <div class="tip-title">Питание</div>
+    <p class="tip-text">1.6–2.2 г белка на кг веса. Ешь цельные продукты, сокращай переработанное, не бойся углеводов.</p>
+  </div>
+  <div class="tip-item">
+    <div class="tip-icon">📈</div>
+    <div class="tip-title">Прогресс</div>
+    <p class="tip-text">Фиксируй веса и повторы в дневнике. Повышай нагрузку на 2.5–5% каждые 1–2 недели — это ключ к росту.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">FIT<span>FORM</span></div>
+  <div class="foot-copy">© 2025 FITFORM. Всё для твоего прогресса.</div>
+</footer>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+  // Close menu on outside tap
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobileMenu');
+    const burger = document.getElementById('burger');
+    if (!menu.contains(e.target) && !burger.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>
