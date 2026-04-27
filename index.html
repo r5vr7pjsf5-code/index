@@ -552,6 +552,13 @@
       letter-spacing: .06em;
     }
 
+    /* schedule sunday spans 2 cols on mobile 2-col grid */
+    #sunday-rest { grid-column: span 2; }
+
+    /* hide desktop-only elements on mobile */
+    .hero-right { display: none; }
+    .nav-links  { display: none; }
+
     /* ANIMATIONS */
     .hero-title { animation: fadeUp .9s .1s both; }
     .hero-sub   { animation: fadeUp .9s .25s both; }
@@ -561,6 +568,183 @@
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* ══════════════════════════════
+       DESKTOP  ≥ 900px
+    ══════════════════════════════ */
+    @media (min-width: 900px) {
+
+      /* NAV — show links, hide burger */
+      nav {
+        padding: 1.2rem 3rem;
+      }
+      .burger { display: none; }
+      .mobile-menu { display: none !important; }
+      .nav-links {
+        display: flex;
+        gap: 2.5rem;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: .85rem;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        transition: color .2s;
+      }
+      .nav-links a:hover { color: var(--accent); }
+
+      /* HERO — two column grid */
+      .hero {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        flex-direction: unset;
+        justify-content: unset;
+        padding-top: 70px;
+      }
+      .hero-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-end;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-left {
+        padding: 5rem 3rem;
+        justify-content: center;
+      }
+      .hero-title { font-size: clamp(4rem, 8vw, 8rem); }
+      .hero-sub { font-size: 1rem; max-width: 420px; }
+      .hero-bg-number {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 900;
+        font-size: 30vw;
+        color: rgba(255,255,255,.02);
+        white-space: nowrap;
+        user-select: none;
+        line-height: 1;
+      }
+      /* stats grid sits in right column */
+      .hero-stats {
+        position: relative; z-index: 2;
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+      .hero-stat { padding: 1.8rem 1.5rem; }
+      .hero-stat-num { font-size: 3rem; }
+
+      /* SECTION HEADER — horizontal layout */
+      .section-header {
+        padding: 5rem 3rem 2rem;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .section-label { margin-bottom: .8rem; }
+      .section-count { margin-top: 0; }
+
+      /* PROGRAMS — 3 columns */
+      .programs-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .program-card { padding: 2.5rem; }
+      .program-card:hover { background: var(--surface); }
+
+      /* PROFILES — auto-fill grid */
+      .profiles-deep {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+      .profile-card { padding: 3rem 2.5rem; }
+
+      /* SCHEDULE — 7 columns */
+      .schedule-grid {
+        grid-template-columns: repeat(7, 1fr);
+      }
+      #sunday-rest { grid-column: auto; }
+      .day-col {
+        min-height: 320px;
+        padding: 2rem 1.5rem;
+      }
+      .day-col.rest[style] { grid-column: unset; }
+      .day-name { font-size: 1.1rem; }
+      .day-type { font-size: .68rem; margin-bottom: 1.5rem; }
+      .workout-pill { font-size: .78rem; padding: .5rem .8rem; margin-bottom: .6rem; }
+
+      /* EXERCISES — show table, hide cards */
+      .ex-table-wrap { padding: 3rem; }
+      .ex-cards { display: none; }
+      table {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .88rem;
+      }
+      thead tr { border-bottom: 2px solid var(--accent); }
+      th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700;
+        font-size: .75rem;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--muted);
+        text-align: left;
+        padding: 1rem 1.5rem 1rem 0;
+      }
+      td {
+        padding: 1rem 1.5rem 1rem 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        vertical-align: top;
+      }
+      tr:hover td { background: var(--surface); }
+      .ex-num {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700; font-size: 1rem; color: var(--muted);
+      }
+      .ex-name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700; font-size: 1.1rem; color: var(--white);
+      }
+      .ex-muscle { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+      .ex-sets {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 700; font-size: 1.2rem; color: var(--accent);
+      }
+
+      /* TIPS — 4 columns */
+      .tips-strip {
+        padding: 4rem 3rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+      }
+      .tip-item {
+        padding: 0 2rem;
+        border-right: 1px solid rgba(8,8,8,.2);
+      }
+      .tip-item:first-child { padding-left: 0; }
+      .tip-item:last-child { border-right: none; }
+
+      /* FOOTER */
+      footer {
+        padding: 3rem;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+      }
+    }
+
+    /* ══════════════════════════════
+       WIDE  ≥ 1280px
+    ══════════════════════════════ */
+    @media (min-width: 1280px) {
+      .programs-grid { grid-template-columns: repeat(3, 1fr); }
+      .hero-left { padding: 5rem 4rem 5rem 5rem; }
+    }
   </style>
 </head>
 <body>
@@ -568,6 +752,12 @@
 <!-- NAV -->
 <nav>
   <div class="logo">FIT<span>FORM</span></div>
+  <ul class="nav-links">
+    <li><a href="#profiles">Профили</a></li>
+    <li><a href="#programs">Программы</a></li>
+    <li><a href="#schedule">Расписание</a></li>
+    <li><a href="#exercises">Упражнения</a></li>
+  </ul>
   <div class="burger" onclick="toggleMenu()" id="burger">
     <span></span><span></span><span></span>
   </div>
@@ -600,10 +790,26 @@
         <div class="hero-stat-label">Средний курс</div>
       </div>
     </div>
+  </div><!-- /hero-left -->
+  <!-- Desktop only right column -->
+  <div class="hero-right">
+    <div class="hero-bg-number">FIT</div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">5<span>+</span></div>
+        <div class="hero-stat-label">Типов людей</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">40<span>+</span></div>
+        <div class="hero-stat-label">Упражнений</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">12<span>нед</span></div>
+        <div class="hero-stat-label">Средний курс</div>
+      </div>
+    </div>
   </div>
 </section>
-
-<!-- MARQUEE -->
 <div class="marquee-strip">
   <div class="marquee-track">
     <span>Сила</span><span class="accent">·</span>
@@ -829,7 +1035,7 @@
       <div class="workout-pill blue">Лицевая тяга · 3×15</div>
       <div class="workout-pill blue">Молот. бицепс · 3×12</div>
     </div>
-    <div class="day-col rest" style="grid-column: span 2;">
+    <div class="day-col rest" id="sunday-rest">
       <div class="day-name">Вс</div>
       <div class="rest-label">Отдых</div>
     </div>
@@ -844,7 +1050,37 @@
     <div class="section-count">15 упражнений</div>
   </div>
   <div class="ex-table-wrap">
-    <div class="ex-cards">
+    <!-- DESKTOP TABLE -->
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Упражнение</th>
+          <th>Подходы × Повторы</th>
+          <th>Отдых</th>
+          <th>Группа мышц</th>
+          <th>Сложность</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="ex-num">01</span></td><td><div class="ex-name">Приседания со штангой</div><div class="ex-muscle">Квадрицепсы, ягодицы, кор</div></td><td><span class="ex-sets">4 × 8</span></td><td>2–3 мин</td><td>Ноги</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">02</span></td><td><div class="ex-name">Становая тяга</div><div class="ex-muscle">Спина, ягодицы, хамстринг</div></td><td><span class="ex-sets">4 × 5</span></td><td>3 мин</td><td>Спина / Ноги</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">03</span></td><td><div class="ex-name">Жим штанги лёжа</div><div class="ex-muscle">Грудь, трицепс, передние дельты</div></td><td><span class="ex-sets">4 × 8</span></td><td>2 мин</td><td>Грудь</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">04</span></td><td><div class="ex-name">Подтягивания широким хватом</div><div class="ex-muscle">Широчайшие, бицепс</div></td><td><span class="ex-sets">4 × max</span></td><td>2 мин</td><td>Спина</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">05</span></td><td><div class="ex-name">Военный жим</div><div class="ex-muscle">Дельты, трицепс, кор</div></td><td><span class="ex-sets">3 × 10</span></td><td>2 мин</td><td>Плечи</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">06</span></td><td><div class="ex-name">Ягодичный мостик</div><div class="ex-muscle">Ягодицы, хамстринг, кор</div></td><td><span class="ex-sets">4 × 15</span></td><td>90 сек</td><td>Ягодицы</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">07</span></td><td><div class="ex-name">Планка</div><div class="ex-muscle">Кор, стабилизаторы</div></td><td><span class="ex-sets">3 × 60с</span></td><td>60 сек</td><td>Кор</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">08</span></td><td><div class="ex-name">Тяга гантели одной рукой</div><div class="ex-muscle">Широчайшие, ромбовидные</div></td><td><span class="ex-sets">3 × 12</span></td><td>90 сек</td><td>Спина</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">09</span></td><td><div class="ex-name">Болгарские выпады</div><div class="ex-muscle">Квадрицепсы, ягодицы, баланс</div></td><td><span class="ex-sets">3 × 10</span></td><td>2 мин</td><td>Ноги</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">10</span></td><td><div class="ex-name">Разводка гантелей лёжа</div><div class="ex-muscle">Грудь, передние дельты</div></td><td><span class="ex-sets">3 × 12</span></td><td>90 сек</td><td>Грудь</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">11</span></td><td><div class="ex-name">Подъём гантелей на бицепс</div><div class="ex-muscle">Бицепс, брахиалис</div></td><td><span class="ex-sets">3 × 12</span></td><td>60 сек</td><td>Бицепс</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">12</span></td><td><div class="ex-name">Разгибания на трицепс в блоке</div><div class="ex-muscle">Трицепс</div></td><td><span class="ex-sets">3 × 15</span></td><td>60 сек</td><td>Трицепс</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">13</span></td><td><div class="ex-name">Румынская тяга</div><div class="ex-muscle">Хамстринг, ягодицы, поясница</div></td><td><span class="ex-sets">3 × 10</span></td><td>2 мин</td><td>Ноги</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">14</span></td><td><div class="ex-name">Боковые подъёмы гантелей</div><div class="ex-muscle">Средние дельты</div></td><td><span class="ex-sets">4 × 15</span></td><td>60 сек</td><td>Плечи</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+        <tr><td><span class="ex-num">15</span></td><td><div class="ex-name">Подъём на носки стоя</div><div class="ex-muscle">Икроножные, камбаловидные</div></td><td><span class="ex-sets">4 × 20</span></td><td>60 сек</td><td>Икры</td><td><div class="difficulty-bar"><div class="diff-dot on"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div><div class="diff-dot"></div></div></td></tr>
+      </tbody>
+    </table>
+    <!-- MOBILE CARDS -->
       <div class="ex-card">
         <span class="ex-num">01</span>
         <div class="ex-info"><div class="ex-name">Приседания со штангой</div><div class="ex-muscle">Квадрицепсы, ягодицы, кор</div></div>
